@@ -1,0 +1,588 @@
+{
+  "meta": {
+    "version": "1.0",
+    "created": "2026-01-28",
+    "author": "Provolution Team",
+    "description": "Challenge-Katalog für Provolution Gamification System"
+  },
+  "config": {
+    "xp_ranges": {
+      "onboarding": [50, 100],
+      "energie": [100, 300],
+      "mobilitaet": [150, 400],
+      "community": [100, 500],
+      "politik": [200, 1000]
+    },
+    "sec_multiplier": {
+      "1-3": 1.0,
+      "4-6": 1.5,
+      "7-8": 2.0,
+      "9-10": 3.0
+    }
+  },
+  "challenges": [
+    {
+      "id": "ON-1",
+      "category": "onboarding",
+      "name": "Klimaheld-Profil",
+      "name_emoji": "🌱 Klimaheld-Profil",
+      "description": "Vervollständige dein Profil und berechne deinen persönlichen CO₂-Fußabdruck",
+      "description_long": "Der erste Schritt ist immer der wichtigste! Fülle dein Profil aus und nutze unseren CO₂-Rechner, um deinen aktuellen Fußabdruck zu kennen. Nur wer weiß, wo er steht, kann sich verbessern.",
+      "duration_days": 1,
+      "xp_reward": 50,
+      "difficulty": "easy",
+      "success_criteria": [
+        "Alle Pflichtfelder im Profil ausgefüllt",
+        "CO₂-Rechner vollständig durchlaufen",
+        "Erste SEC-Bewertung erhalten"
+      ],
+      "verification": {
+        "method": "automatic",
+        "type": "system_check",
+        "auto_verify": true
+      },
+      "badge": {
+        "name": "Klimaheld in spe",
+        "icon": "🌱",
+        "tier": "bronze"
+      },
+      "impact": {
+        "co2_kg_year": 0,
+        "type": "awareness",
+        "description": "Bewusstseinsbildung"
+      }
+    },
+    {
+      "id": "ON-2",
+      "category": "onboarding",
+      "name": "Deine erste Idee",
+      "name_emoji": "💡 Deine erste Idee",
+      "description": "Reiche deine erste Klimaschutz-Idee ein und erhalte Community-Feedback",
+      "description_long": "Jeder hat gute Ideen! Teile deine erste Klimaschutz-Idee mit der Community. Egal ob groß oder klein - jede Idee zählt und wird nach dem SEC-Prinzip bewertet.",
+      "duration_days": 7,
+      "xp_reward": 75,
+      "difficulty": "easy",
+      "success_criteria": [
+        "1 Idee erfolgreich eingereicht",
+        "Mindestens 3 Bewertungsfelder ausgefüllt",
+        "Idee hat SEC-Score erhalten"
+      ],
+      "verification": {
+        "method": "automatic",
+        "type": "submission_check",
+        "auto_verify": true
+      },
+      "badge": {
+        "name": "Ideengeber",
+        "icon": "💡",
+        "tier": "bronze"
+      },
+      "impact": {
+        "co2_kg_year": null,
+        "type": "variable",
+        "description": "Variabel nach Idee"
+      }
+    },
+    {
+      "id": "ON-3",
+      "category": "onboarding",
+      "name": "Community-Entdecker",
+      "name_emoji": "💬 Community-Entdecker",
+      "description": "Bewerte 5 Ideen anderer Nutzer und gib konstruktives Feedback",
+      "description_long": "Die Stärke von Provolution liegt in der Community! Bewerte die Ideen anderer Nutzer, gib konstruktives Feedback und hilf so, die besten Lösungen nach oben zu bringen.",
+      "duration_days": 3,
+      "xp_reward": 100,
+      "difficulty": "easy",
+      "success_criteria": [
+        "5 Bewertungen abgegeben",
+        "Mindestens 2 Bewertungen mit Kommentar",
+        "Keine Copy-Paste-Kommentare"
+      ],
+      "verification": {
+        "method": "automatic",
+        "type": "activity_log",
+        "auto_verify": true
+      },
+      "badge": {
+        "name": "Community-Mitglied",
+        "icon": "💬",
+        "tier": "bronze"
+      },
+      "impact": {
+        "co2_kg_year": 0,
+        "type": "quality",
+        "description": "Qualitätssteigerung durch Peer-Review"
+      }
+    },
+    {
+      "id": "EN-1",
+      "category": "energie",
+      "name": "Standby-Killer",
+      "name_emoji": "⚡ Standby-Killer",
+      "description": "Schalte alle Geräte nachts komplett aus (Steckerleiste) - 14 Tage lang",
+      "description_long": "Standby-Verbrauch macht bis zu 10% deines Stromverbrauchs aus! Nutze schaltbare Steckerleisten und schalte alle Geräte nachts komplett aus. Du sparst Geld und CO₂.",
+      "duration_days": 14,
+      "xp_reward": 150,
+      "difficulty": "medium",
+      "success_criteria": [
+        "14 Tage täglich bestätigt",
+        "Mindestens 5 Geräte auf Steckerleiste",
+        "Nacht-Routine etabliert"
+      ],
+      "verification": {
+        "method": "hybrid",
+        "type": "self_report",
+        "options": ["smart_plug_api", "photo_proof"],
+        "auto_verify": false,
+        "spot_check_rate": 0.1
+      },
+      "badge": {
+        "name": "Strom-Ninja",
+        "icon": "⚡",
+        "tier": "silver"
+      },
+      "impact": {
+        "co2_kg_year": 100,
+        "savings_euro_year": 50,
+        "type": "direct",
+        "calculation": "avg_standby_kwh * 365 * co2_factor"
+      }
+    },
+    {
+      "id": "EN-2",
+      "category": "energie",
+      "name": "Heiz-Held",
+      "name_emoji": "🌡️ Heiz-Held",
+      "description": "Senke die Raumtemperatur dauerhaft um 1°C und tracke die Ersparnis",
+      "description_long": "Jedes Grad weniger spart ca. 6% Heizkosten! Senke die Temperatur um nur 1°C - du wirst den Unterschied kaum merken, aber dein Geldbeutel und das Klima schon.",
+      "duration_days": 30,
+      "xp_reward": 300,
+      "difficulty": "medium",
+      "success_criteria": [
+        "30 Tage Temperatur-Log",
+        "Nachweisbare Reduktion um 1°C",
+        "Vorher/Nachher-Vergleich dokumentiert"
+      ],
+      "verification": {
+        "method": "hybrid",
+        "type": "photo_proof",
+        "options": ["smart_thermostat_api", "manual_log"],
+        "auto_verify": false,
+        "spot_check_rate": 0.15
+      },
+      "badge": {
+        "name": "Wärme-Optimierer",
+        "icon": "🌡️",
+        "tier": "gold"
+      },
+      "impact": {
+        "co2_kg_year": 300,
+        "savings_euro_year": 120,
+        "type": "direct",
+        "calculation": "heating_consumption * 0.06 * co2_factor"
+      }
+    },
+    {
+      "id": "EN-3",
+      "category": "energie",
+      "name": "Dusch-DJ",
+      "name_emoji": "🎵 Dusch-DJ",
+      "description": "Dusche nur für die Dauer eines 3-Minuten-Songs - 21 Tage",
+      "description_long": "Mach aus dem Duschen ein Spiel! Wähle deinen Lieblings-3-Minuten-Song und dusche nur so lange wie er läuft. Du sparst Wasser, Energie und hast noch gute Laune dabei.",
+      "duration_days": 21,
+      "xp_reward": 200,
+      "difficulty": "medium",
+      "success_criteria": [
+        "21 Tage täglich bestätigt",
+        "Durchschnittliche Duschzeit ≤3 Minuten",
+        "Song-Playlist geteilt (optional)"
+      ],
+      "verification": {
+        "method": "self_report",
+        "type": "daily_confirm",
+        "options": ["timer_screenshot"],
+        "auto_verify": false,
+        "spot_check_rate": 0.05
+      },
+      "badge": {
+        "name": "Sauber & Sparsam",
+        "icon": "🎵",
+        "tier": "silver"
+      },
+      "impact": {
+        "co2_kg_year": 150,
+        "savings_euro_year": 80,
+        "type": "direct",
+        "calculation": "water_heating_saved * co2_factor"
+      }
+    },
+    {
+      "id": "MO-1",
+      "category": "mobilitaet",
+      "name": "Fahrrad-Pendler",
+      "name_emoji": "🚲 Fahrrad-Pendler",
+      "description": "Ersetze 3 Arbeitswege pro Woche durch Fahrrad oder ÖPNV - 4 Wochen",
+      "description_long": "Der Arbeitsweg ist der größte Hebel für klimafreundliche Mobilität! Ersetze nur 3 Autofahrten pro Woche durch Fahrrad oder ÖPNV. Du sparst Geld, tust etwas für deine Gesundheit und das Klima.",
+      "duration_days": 28,
+      "xp_reward": 300,
+      "difficulty": "hard",
+      "success_criteria": [
+        "12 Pendelfahrten ohne Auto dokumentiert",
+        "GPS-Track oder ÖPNV-Ticket als Nachweis",
+        "Mindestens 80% der geplanten Fahrten"
+      ],
+      "verification": {
+        "method": "proof_required",
+        "type": "gps_or_ticket",
+        "options": ["strava_api", "komoot_api", "ticket_photo"],
+        "auto_verify": false,
+        "spot_check_rate": 0.2
+      },
+      "badge": {
+        "name": "Pedalritter",
+        "icon": "🚲",
+        "tier": "gold"
+      },
+      "impact": {
+        "co2_kg_year": 400,
+        "savings_euro_year": 600,
+        "type": "direct",
+        "calculation": "car_km_replaced * co2_per_km * 52"
+      }
+    },
+    {
+      "id": "MO-2",
+      "category": "mobilitaet",
+      "name": "Autofrei-Woche",
+      "name_emoji": "🚶 Autofrei-Woche",
+      "description": "Nutze 7 Tage lang kein Auto - egal wofür",
+      "description_long": "Eine Woche komplett ohne Auto - schaffst du das? Nutze Fahrrad, ÖPNV, zu Fuß oder organisiere Fahrgemeinschaften. Du wirst überrascht sein, wie gut es funktioniert!",
+      "duration_days": 7,
+      "xp_reward": 250,
+      "difficulty": "hard",
+      "success_criteria": [
+        "7 Tage tägliche Bestätigung",
+        "Mindestens 3 alternative Verkehrsmittel dokumentiert",
+        "Keine Auto-Nutzung (auch nicht als Beifahrer bei eigenem Auto)"
+      ],
+      "verification": {
+        "method": "hybrid",
+        "type": "self_report_with_proof",
+        "options": ["photo_alternative", "gps_track"],
+        "auto_verify": false,
+        "spot_check_rate": 0.15
+      },
+      "badge": {
+        "name": "Car-Free Warrior",
+        "icon": "🚶",
+        "tier": "gold"
+      },
+      "impact": {
+        "co2_kg_year": 2600,
+        "savings_euro_year": 3000,
+        "type": "potential",
+        "description": "~50 kg/Woche, ~2.600 kg/Jahr bei Fortführung"
+      }
+    },
+    {
+      "id": "MO-3",
+      "category": "mobilitaet",
+      "name": "Flug-Fasten",
+      "name_emoji": "✈️❌ Flug-Fasten",
+      "description": "Verzichte 12 Monate auf Flugreisen und wähle klimafreundliche Alternativen",
+      "description_long": "Ein Langstreckenflug verursacht so viel CO₂ wie ein ganzes Jahr Autofahren! Verzichte ein Jahr auf Flüge und entdecke Europa mit Bahn und Bus. Die Reise ist das Ziel!",
+      "duration_days": 365,
+      "xp_reward": 400,
+      "difficulty": "expert",
+      "success_criteria": [
+        "12 Monate keine Flugreisen",
+        "Mindestens 1 dokumentierte Alternativ-Reise",
+        "Ehrenerklärung am Ende"
+      ],
+      "verification": {
+        "method": "declaration",
+        "type": "honor_statement",
+        "options": ["travel_documentation"],
+        "auto_verify": false,
+        "spot_check_rate": 0.0
+      },
+      "badge": {
+        "name": "Bodenständig",
+        "icon": "🌍",
+        "tier": "platinum"
+      },
+      "impact": {
+        "co2_kg_year": 2000,
+        "savings_euro_year": 500,
+        "type": "direct",
+        "description": "1.000-3.000 kg CO₂/Jahr je nach Fluggewohnheit"
+      }
+    },
+    {
+      "id": "CO-1",
+      "category": "community",
+      "name": "Oma-Retrofit",
+      "name_emoji": "👵 Oma-Retrofit",
+      "description": "Hilf einem älteren Verwandten/Nachbarn bei Energiespar-Maßnahmen",
+      "description_long": "Ältere Menschen haben oft Schwierigkeiten mit neuer Technik. Hilf deiner Oma, deinem Nachbarn oder einem anderen älteren Menschen bei einfachen Energiespar-Maßnahmen. Gemeinsam schaffen wir mehr!",
+      "duration_days": 14,
+      "xp_reward": 300,
+      "difficulty": "medium",
+      "success_criteria": [
+        "Mindestens 3 Maßnahmen umgesetzt",
+        "Foto-Dokumentation",
+        "Feedback der unterstützten Person"
+      ],
+      "verification": {
+        "method": "proof_required",
+        "type": "photo_and_description",
+        "options": ["photo_proof", "written_feedback"],
+        "auto_verify": false,
+        "spot_check_rate": 0.1
+      },
+      "badge": {
+        "name": "Generationen-Brücke",
+        "icon": "👵",
+        "tier": "gold"
+      },
+      "impact": {
+        "co2_kg_year": 200,
+        "type": "indirect",
+        "multiplier_effect": true,
+        "description": "Multiplikator-Effekt durch Weitergabe"
+      }
+    },
+    {
+      "id": "CO-2",
+      "category": "community",
+      "name": "Klima-Recruiter",
+      "name_emoji": "📢 Klima-Recruiter",
+      "description": "Überzeuge 5 Freunde, sich bei Provolution anzumelden",
+      "description_long": "Die beste Werbung kommt von zufriedenen Nutzern! Teile deinen persönlichen Referral-Link und überzeuge 5 Freunde, Teil der Provolution-Bewegung zu werden.",
+      "duration_days": 30,
+      "xp_reward": 500,
+      "difficulty": "medium",
+      "success_criteria": [
+        "5 neue Nutzer über persönlichen Referral-Link",
+        "Neue Nutzer haben mindestens 1 Aktion durchgeführt",
+        "Kein Fake-Account-Missbrauch"
+      ],
+      "verification": {
+        "method": "automatic",
+        "type": "referral_tracking",
+        "auto_verify": true,
+        "anti_fraud": ["email_verification", "activity_check"]
+      },
+      "badge": {
+        "name": "Influencer",
+        "icon": "📢",
+        "tier": "gold"
+      },
+      "impact": {
+        "co2_kg_year": null,
+        "type": "multiplier",
+        "description": "Potenziell 5× Durchschnitts-Impact"
+      }
+    },
+    {
+      "id": "CO-3",
+      "category": "community",
+      "name": "Nachbarschafts-Held",
+      "name_emoji": "🤝 Nachbarschafts-Held",
+      "description": "Gründe ein Team (min. 5 Personen) und sammelt gemeinsam 5.000 XP",
+      "description_long": "Gemeinsam sind wir stärker! Gründe ein Team mit Nachbarn, Kollegen oder Freunden und erreicht zusammen 5.000 XP. Team-Challenges machen mehr Spaß und motivieren langfristig.",
+      "duration_days": 56,
+      "xp_reward": 200,
+      "difficulty": "hard",
+      "success_criteria": [
+        "Team mit mindestens 5 aktiven Mitgliedern",
+        "Team erreicht 5.000 Gesamt-XP",
+        "Alle Mitglieder haben mindestens 500 XP beigetragen"
+      ],
+      "verification": {
+        "method": "automatic",
+        "type": "team_dashboard",
+        "auto_verify": true
+      },
+      "badge": {
+        "name": "Team-Captain",
+        "icon": "🤝",
+        "tier": "gold"
+      },
+      "impact": {
+        "co2_kg_year": 1000,
+        "type": "team",
+        "description": "~1.000 kg CO₂/Jahr als Team"
+      },
+      "bonus": {
+        "type": "team_bonus",
+        "value": 100,
+        "description": "+100 XP für jeden Teammitglied bei Erfolg"
+      }
+    },
+    {
+      "id": "PO-1",
+      "category": "politik",
+      "name": "Demokratie-Starter",
+      "name_emoji": "🗳️ Demokratie-Starter",
+      "description": "Unterschreibe 3 Klimaschutz-Petitionen und teile sie",
+      "description_long": "Deine Stimme zählt! Unterschreibe 3 seriöse Klimaschutz-Petitionen und teile sie in deinem Netzwerk. Gemeinsam können wir politischen Druck aufbauen.",
+      "duration_days": 7,
+      "xp_reward": 200,
+      "difficulty": "easy",
+      "success_criteria": [
+        "3 Petitionen unterschrieben",
+        "Bestätigungs-E-Mails als Nachweis",
+        "Mindestens 1 Petition geteilt"
+      ],
+      "verification": {
+        "method": "proof_required",
+        "type": "screenshot",
+        "options": ["email_confirmation", "share_proof"],
+        "auto_verify": false,
+        "spot_check_rate": 0.2
+      },
+      "badge": {
+        "name": "Stimme erhoben",
+        "icon": "🗳️",
+        "tier": "silver"
+      },
+      "impact": {
+        "co2_kg_year": null,
+        "type": "systemic",
+        "description": "Policy-Ebene, nicht direkt messbar"
+      }
+    },
+    {
+      "id": "PO-2",
+      "category": "politik",
+      "name": "Politiker-Ping",
+      "name_emoji": "📧 Politiker-Ping",
+      "description": "Kontaktiere deinen Wahlkreis-Abgeordneten zu einem Klimathema",
+      "description_long": "Politiker hören auf ihre Wähler! Schreibe deinem Wahlkreis-Abgeordneten eine persönliche E-Mail oder einen Brief zu einem Klimathema, das dir wichtig ist. Wir helfen dir mit Vorlagen.",
+      "duration_days": 14,
+      "xp_reward": 500,
+      "difficulty": "hard",
+      "success_criteria": [
+        "E-Mail oder Brief an Abgeordneten gesendet",
+        "Inhalt bezieht sich auf konkretes Klimathema",
+        "Sende-Bestätigung dokumentiert"
+      ],
+      "verification": {
+        "method": "proof_required",
+        "type": "screenshot",
+        "options": ["email_sent_screenshot", "letter_copy"],
+        "auto_verify": false,
+        "spot_check_rate": 0.3
+      },
+      "badge": {
+        "name": "Druck-Macher",
+        "icon": "📧",
+        "tier": "gold"
+      },
+      "impact": {
+        "co2_kg_year": null,
+        "type": "systemic",
+        "description": "Policy-Einfluss, potenziell hoher systemischer Impact"
+      },
+      "resources": {
+        "templates": true,
+        "politician_finder": true,
+        "talking_points": true
+      }
+    },
+    {
+      "id": "PO-3",
+      "category": "politik",
+      "name": "Bürger-Gesetzgeber",
+      "name_emoji": "⚖️ Bürger-Gesetzgeber",
+      "description": "Erarbeite einen High-SEC-Gesetzesvorschlag mit der Community",
+      "description_long": "Die höchste Stufe des Engagements! Erarbeite gemeinsam mit der Community einen konkreten Gesetzesvorschlag, der nach dem SEC-Prinzip optimiert ist. Bei genug Unterstützung wird er als Petition eingereicht.",
+      "duration_days": 56,
+      "xp_reward": 1000,
+      "difficulty": "expert",
+      "success_criteria": [
+        "Gesetzesvorschlag mit SEC-Score ≥8",
+        "Mindestens 100 Community-Votes",
+        "Vollständige Begründung und Impact-Analyse"
+      ],
+      "verification": {
+        "method": "community_review",
+        "type": "sec_calculation",
+        "options": ["expert_review", "community_vote"],
+        "auto_verify": false,
+        "approval_threshold": 0.7
+      },
+      "badge": {
+        "name": "Demokratie-Architekt",
+        "icon": "⚖️",
+        "tier": "platinum"
+      },
+      "impact": {
+        "co2_kg_year": null,
+        "type": "systemic",
+        "description": "Potenziell Millionen Tonnen bei Umsetzung"
+      },
+      "bonus": {
+        "type": "success_bonus",
+        "petition_submitted": 500,
+        "parliamentary_discussion": 2000,
+        "law_passed": 10000
+      }
+    }
+  ],
+  "badges": {
+    "tiers": ["bronze", "silver", "gold", "platinum"],
+    "tier_requirements": {
+      "bronze": { "challenges_completed": 1 },
+      "silver": { "challenges_completed": 5, "co2_saved": 100 },
+      "gold": { "challenges_completed": 10, "co2_saved": 500 },
+      "platinum": { "challenges_completed": 20, "co2_saved": 2000 }
+    }
+  },
+  "streaks": {
+    "daily_bonus": {
+      "7_days": 100,
+      "30_days": 500,
+      "90_days": 1500,
+      "365_days": 5000
+    },
+    "break_penalty": {
+      "grace_period_hours": 48,
+      "reset_after_days": 3
+    }
+  },
+  "leaderboards": [
+    {
+      "id": "top_saver",
+      "name": "Top CO₂-Sparer",
+      "metric": "co2_saved_kg",
+      "reset": "monthly"
+    },
+    {
+      "id": "top_xp",
+      "name": "Lifetime XP",
+      "metric": "total_xp",
+      "reset": "never"
+    },
+    {
+      "id": "weekly_champion",
+      "name": "Wochensieger",
+      "metric": "weekly_xp",
+      "reset": "weekly"
+    },
+    {
+      "id": "regional_nrw",
+      "name": "NRW Pioniere",
+      "metric": "co2_saved_kg",
+      "filter": "region:nrw",
+      "reset": "monthly"
+    },
+    {
+      "id": "team_ranking",
+      "name": "Team Champions",
+      "metric": "team_total_xp",
+      "reset": "quarterly"
+    }
+  ]
+}

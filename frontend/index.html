@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Provolution - Klimaschutz Gamification</title>
+    <meta name="description" content="Berechne deinen CO₂-Fußabdruck und werde Teil der Klima-Community. Challenges, Badges und mehr!">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌍</text></svg>">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="gamification.css">
+    <link rel="stylesheet" href="footprint.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #e8f5e9 0%, #f5f7fa 100%);
+            min-height: 100vh;
+        }
+        
+        .demo-header {
+            background: linear-gradient(135deg, #2e7d32, #1b5e20);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .demo-header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        
+        .demo-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .demo-logo h1 {
+            font-size: 1.5rem;
+        }
+        
+        .demo-logo span {
+            font-size: 2rem;
+        }
+        
+        .demo-nav {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+        
+        .demo-nav a {
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .demo-nav a:hover {
+            color: white;
+        }
+        
+        .demo-main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .demo-section {
+            margin-bottom: 60px;
+        }
+        
+        .api-status {
+            background: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #f44336;
+            flex-shrink: 0;
+        }
+        
+        .status-dot.connected {
+            background: #4caf50;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-dot.connecting {
+            background: #ff9800;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .layout-grid {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+        }
+        
+        @media (max-width: 1024px) {
+            .layout-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .demo-header-content {
+                justify-content: center;
+                text-align: center;
+            }
+        }
+        
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        
+        /* Footer */
+        .demo-footer {
+            background: #1b5e20;
+            color: rgba(255,255,255,0.8);
+            text-align: center;
+            padding: 20px;
+            margin-top: 60px;
+        }
+        
+        .demo-footer a {
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <header class="demo-header">
+        <div class="demo-header-content">
+            <div class="demo-logo">
+                <span>🌍</span>
+                <h1>Provolution</h1>
+            </div>
+            
+            <nav class="demo-nav">
+                <a href="#footprint">CO₂-Rechner</a>
+                <a href="#challenges">Challenges</a>
+                <a href="#leaderboard">Leaderboard</a>
+            </nav>
+            
+            <div id="auth-container">
+                <!-- Auth UI renders here -->
+            </div>
+        </div>
+    </header>
+    
+    <main class="demo-main">
+        <!-- API Status -->
+        <div class="api-status">
+            <div class="status-dot connecting" id="api-status-dot"></div>
+            <span id="api-status-text">Verbinde mit API...</span>
+        </div>
+        
+        <div class="layout-grid">
+            <!-- Main Content -->
+            <div class="main-content">
+                <!-- Footprint Calculator Section -->
+                <section class="demo-section" id="footprint">
+                    <div id="footprint-container">
+                        <!-- Footprint Calculator renders here -->
+                    </div>
+                </section>
+                
+                <!-- Challenges Section -->
+                <section class="demo-section" id="challenges">
+                    <div id="challenges-container">
+                        <!-- Challenges UI renders here -->
+                    </div>
+                </section>
+            </div>
+            
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <!-- Leaderboard Section -->
+                <section class="demo-section" id="leaderboard">
+                    <div id="leaderboard-container">
+                        <!-- Leaderboard UI renders here -->
+                    </div>
+                </section>
+            </aside>
+        </div>
+    </main>
+    
+    <footer class="demo-footer">
+        <p>
+            <a href="https://provolution.org" target="_blank">provolution.org</a> • 
+            Open Source unter <a href="https://github.com/yokadeeds-dev/provolution-gamification" target="_blank">GitHub</a> • 
+            <a href="/privacy.html">Datenschutz</a> • 
+            <a href="/impressum.html">Impressum</a>
+        </p>
+        <p style="margin-top: 8px; font-size: 0.85rem;">
+            © 2026 Provolution • Klimaschutz durch Gamification
+        </p>
+    </footer>
+    
+    <!-- Configuration (must be before api-client.js) -->
+    <script src="config.js"></script>
+    
+    <!-- Scripts -->
+    <script src="api-client.js"></script>
+    <script src="auth-ui.js"></script>
+    <script src="challenges-ui.js"></script>
+    <script src="leaderboard-ui.js"></script>
+    <script src="footprint-ui.js"></script>
+    
+    <script>
+        // Check API connection
+        async function checkApiStatus() {
+            const dot = document.getElementById('api-status-dot');
+            const text = document.getElementById('api-status-text');
+            
+            // Get API URL from client
+            const apiBaseUrl = window.ProvolutionAPI?.apiUrl?.replace('/v1', '') || 'http://localhost:8001';
+            
+            try {
+                dot.className = 'status-dot connecting';
+                text.textContent = 'Verbinde...';
+                
+                const response = await fetch(`${apiBaseUrl}/health`, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.status === 'ok') {
+                    dot.className = 'status-dot connected';
+                    text.textContent = `API verbunden • ${data.database?.challenges_count || '?'} Challenges • ${data.database?.users_count || '?'} Users`;
+                } else {
+                    dot.className = 'status-dot';
+                    text.textContent = 'API Status: ' + (data.status || 'unbekannt');
+                }
+            } catch (error) {
+                dot.className = 'status-dot';
+                
+                // Different message for local vs production
+                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                    text.textContent = 'Lokale API nicht erreichbar - starte: uvicorn app.main:app --port 8001';
+                } else {
+                    text.textContent = 'API wird gestartet... (kann 30s dauern bei Free Tier)';
+                    // Retry after 10 seconds for cold start
+                    setTimeout(checkApiStatus, 10000);
+                }
+                
+                console.error('API connection failed:', error);
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🌍 Provolution Gamification App loaded');
+            
+            // Check API status
+            checkApiStatus();
+            
+            // Initialize Footprint Calculator
+            if (typeof initFootprintCalculator === 'function') {
+                const isLoggedIn = window.ProvolutionAPI?.isAuthenticated() || false;
+                initFootprintCalculator('footprint-container', window.ProvolutionAPI, isLoggedIn);
+            }
+            
+            // Refresh status every 30 seconds
+            setInterval(checkApiStatus, 30000);
+        });
+    </script>
+</body>
+</html>
