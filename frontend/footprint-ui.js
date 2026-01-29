@@ -603,22 +603,33 @@ class FootprintCalculator {
     async calculate() {
         try {
             // Use authenticated endpoint if logged in
-            const endpoint = this.isAuthenticated ? '/v1/footprint/me' : '/v1/footprint/calculate';
-            const response = await fetch(`http://localhost:8001${endpoint}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...(this.isAuthenticated && this.api?.token ? { 'Authorization': `Bearer ${this.api.token}` } : {})
-                },
-                body: JSON.stringify(this.data)
-            });
+            const endpoint = this.isAuthenticated ? '/footprint/me' : '/footprint/calculate';
             
-            if (!response.ok) throw new Error('Calculation failed');
-            
-            this.result = await response.json();
+            // Use API client if available, otherwise direct fetch
+            if (this.api && typeof this.api.post === 'function') {
+                this.result = await this.api.post(endpoint, this.data);
+            } else {
+                // Fallback: Use global API_BASE_URL from config.js
+                const baseUrl = window.API_BASE_URL || 'https://provolution-api.onrender.com/v1';
+                const response = await fetch(`${baseUrl}${endpoint}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(this.isAuthenticated && this.api?.token ? { 'Authorization': `Bearer ${this.api.token}` } : {})
+                    },
+                    body: JSON.stringify(this.data)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.detail || 'Calculation failed');
+                }
+                
+                this.result = await response.json();
+            }
         } catch (error) {
             console.error('Footprint calculation error:', error);
-            alert('Fehler bei der Berechnung. Bitte versuche es erneut.');
+            alert('Fehler bei der Berechnung: ' + error.message);
         }
     }
 
