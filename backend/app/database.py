@@ -53,9 +53,12 @@ def initialize_database():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username VARCHAR(50) UNIQUE NOT NULL,
             email VARCHAR(255) UNIQUE NOT NULL,
-            password_hash VARCHAR(255) NOT NULL,
+            password_hash VARCHAR(255),
+            google_id VARCHAR(255) UNIQUE,
+            auth_provider VARCHAR(20) DEFAULT 'local',
             display_name VARCHAR(100),
             avatar_emoji VARCHAR(10) DEFAULT '🌱',
+            avatar_url VARCHAR(500),
             total_xp INTEGER DEFAULT 0,
             level INTEGER DEFAULT 1,
             trust_level INTEGER DEFAULT 1,
@@ -249,18 +252,53 @@ def initialize_database():
     ''')
     
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS user_footprints (
+        CREATE TABLE IF NOT EXISTS user_footprint (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+            housing_type VARCHAR(20),
+            housing_size_sqm INTEGER,
+            household_members INTEGER DEFAULT 1,
+            heating_type VARCHAR(20),
+            heating_consumption_kwh INTEGER,
+            electricity_kwh INTEGER,
+            green_electricity BOOLEAN DEFAULT FALSE,
+            has_car BOOLEAN DEFAULT FALSE,
+            car_fuel_type VARCHAR(20),
+            car_km_year INTEGER DEFAULT 0,
+            car_consumption_l_100km REAL,
+            public_transport_km_year INTEGER DEFAULT 0,
+            bike_km_year INTEGER DEFAULT 0,
+            flights_short_haul INTEGER DEFAULT 0,
+            flights_long_haul INTEGER DEFAULT 0,
+            diet_type VARCHAR(20),
+            regional_seasonal BOOLEAN DEFAULT FALSE,
+            food_waste_level VARCHAR(10),
+            shopping_frequency VARCHAR(10),
+            secondhand_preference BOOLEAN DEFAULT FALSE,
+            digital_consumption VARCHAR(10),
+            co2_total_kg_year REAL,
+            co2_housing_kg REAL,
+            co2_mobility_kg REAL,
+            co2_nutrition_kg REAL,
+            co2_consumption_kg REAL,
+            calculation_version VARCHAR(10) DEFAULT '1.0',
+            last_calculated TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS footprint_history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-            calculation_date DATE NOT NULL,
-            total_co2_kg REAL NOT NULL,
-            mobility_co2_kg REAL,
-            housing_co2_kg REAL,
-            nutrition_co2_kg REAL,
-            consumption_co2_kg REAL,
-            sec_score REAL,
-            details_json TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            co2_total_kg_year REAL,
+            co2_housing_kg REAL,
+            co2_mobility_kg REAL,
+            co2_nutrition_kg REAL,
+            co2_consumption_kg REAL,
+            trigger_type VARCHAR(20)
         )
     ''')
     
@@ -284,7 +322,8 @@ def initialize_database():
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_user_challenges_user ON user_challenges(user_id)')
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_user_challenges_status ON user_challenges(status)')
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_xp_transactions_user ON xp_transactions(user_id)')
-    cursor.execute('CREATE INDEX IF NOT EXISTS idx_user_footprints_user ON user_footprints(user_id)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_user_footprint_user ON user_footprint(user_id)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_footprint_history_user ON footprint_history(user_id)')
     
     # Insert default emission factors
     emission_factors = [

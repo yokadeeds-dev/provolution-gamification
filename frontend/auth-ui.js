@@ -1,17 +1,24 @@
 /**
  * Provolution Auth UI Component
- * Handles login, registration, and user state display
+ * Handles login, registration, Google OAuth, and user state display
  */
+
+// Google OAuth Client ID
+const GOOGLE_CLIENT_ID = '249276087645-8db6c2913bgsv3p0p4c7njde3j5kvr6c.apps.googleusercontent.com';
 
 class AuthUI {
     constructor(containerId) {
         this.container = document.getElementById(containerId);
         this.currentUser = null;
+        this.googleInitialized = false;
         
         this.init();
     }
     
     async init() {
+        // Load Google Identity Services
+        this.loadGoogleScript();
+        
         // Check if already logged in
         if (ProvolutionAPI.isAuthenticated()) {
             try {
@@ -23,6 +30,79 @@ class AuthUI {
         
         this.render();
         this.setupEventListeners();
+    }
+    
+    loadGoogleScript() {
+        if (document.getElementById('google-gsi-script')) return;
+        
+        const script = document.createElement('script');
+        script.id = 'google-gsi-script';
+        script.src = 'https://accounts.google.com/gsi/client';
+        script.async = true;
+        script.defer = true;
+        script.onload = () => this.initializeGoogle();
+        document.head.appendChild(script);
+    }
+    
+    initializeGoogle() {
+        if (this.googleInitialized || !window.google) return;
+        
+        google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: (response) => this.handleGoogleCallback(response),
+            auto_select: false,
+            cancel_on_tap_outside: true
+        });
+        
+        this.googleInitialized = true;
+        console.log('✅ Google Sign-In initialized');
+    }
+    
+    async handleGoogleCallback(response) {
+        console.log('Google callback received');
+        
+        try {
+            // Send the credential to our backend
+            const result = await this.googleAuth(response.credential);
+            
+            this.currentUser = result.user;
+            this.closeModal();
+            this.render();
+            
+            window.dispatchEvent(new CustomEvent('auth:login', { detail: result.user }));
+            
+            const welcomeMsg = result.is_new_user 
+                ? `Willkommen bei Provolution, ${result.user.display_name}! 🌍🎉`
+                : `Willkommen zurück, ${result.user.display_name}! 🎉`;
+            
+            this.showNotification(welcomeMsg, 'success');
+            
+        } catch (error) {
+            console.error('Google auth error:', error);
+            this.showNotification('Google-Anmeldung fehlgeschlagen: ' + (error.message || 'Unbekannter Fehler'), 'error');
+        }
+    }
+    
+    async googleAuth(credential) {
+        const API_BASE = window.PROVOLUTION_API_URL || 'https://provolution-api.onrender.com/v1';
+        
+        const response = await fetch(`${API_BASE}/auth/google/callback`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ credential })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.detail || data.error?.message || 'Google auth failed');
+        }
+        
+        if (data.access_token) {
+            ProvolutionAPI.setToken(data.access_token);
+        }
+        
+        return data;
     }
     
     setupEventListeners() {
@@ -67,10 +147,38 @@ class AuthUI {
         `;
     }
     
+    renderGoogleButton(containerId) {
+        if (!window.google || !this.googleInitialized) {
+            // Retry after script loads
+            setTimeout(() => this.renderGoogleButton(containerId), 500);
+            return;
+        }
+        
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        
+        google.accounts.id.renderButton(container, {
+            theme: 'outline',
+            size: 'large',
+            width: '100%',
+            text: 'continue_with',
+            shape: 'rectangular',
+            logo_alignment: 'center'
+        });
+    }
+    
     showLoginForm() {
         this.showModal(`
             <div class="auth-form">
                 <h2>🔐 Anmelden</h2>
+                
+                <!-- Google Sign-In Button -->
+                <div id="google-signin-btn" class="google-btn-container"></div>
+                
+                <div class="auth-divider">
+                    <span>oder mit E-Mail</span>
+                </div>
+                
                 <form id="login-form">
                     <div class="form-group">
                         <label for="login-email">E-Mail</label>
@@ -92,6 +200,9 @@ class AuthUI {
             </div>
         `);
         
+        // Render Google button
+        setTimeout(() => this.renderGoogleButton('google-signin-btn'), 100);
+        
         document.getElementById('login-form').addEventListener('submit', (e) => {
             e.preventDefault();
             this.handleLogin();
@@ -102,6 +213,14 @@ class AuthUI {
         this.showModal(`
             <div class="auth-form">
                 <h2>🌱 Registrieren</h2>
+                
+                <!-- Google Sign-In Button -->
+                <div id="google-signup-btn" class="google-btn-container"></div>
+                
+                <div class="auth-divider">
+                    <span>oder mit E-Mail</span>
+                </div>
+                
                 <form id="register-form">
                     <div class="form-group">
                         <label for="reg-username">Benutzername</label>
@@ -117,7 +236,7 @@ class AuthUI {
                         <label for="reg-password">Passwort</label>
                         <input type="password" id="reg-password" required placeholder="••••••••" 
                                minlength="8">
-                        <small>Min. 8 Zeichen, 1 Großbuchstabe, 1 Zahl</small>
+                        <small>Min. 8 Zeichen</small>
                     </div>
                     <div class="form-group">
                         <label for="reg-region">Region (optional)</label>
@@ -141,10 +260,6 @@ class AuthUI {
                             <option value="SL">Saarland</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="reg-referral">Einladungscode (optional)</label>
-                        <input type="text" id="reg-referral" placeholder="FRIEND123">
-                    </div>
                     <div class="form-error" id="register-error"></div>
                     <button type="submit" class="btn-primary">Konto erstellen</button>
                 </form>
@@ -156,6 +271,9 @@ class AuthUI {
                 </p>
             </div>
         `);
+        
+        // Render Google button
+        setTimeout(() => this.renderGoogleButton('google-signup-btn'), 100);
         
         document.getElementById('register-form').addEventListener('submit', (e) => {
             e.preventDefault();
@@ -190,15 +308,13 @@ class AuthUI {
         const email = document.getElementById('reg-email').value;
         const password = document.getElementById('reg-password').value;
         const region = document.getElementById('reg-region').value;
-        const referralCode = document.getElementById('reg-referral').value;
         const errorEl = document.getElementById('register-error');
         
         try {
             errorEl.textContent = '';
             
             const result = await ProvolutionAPI.auth.register(username, email, password, {
-                region: region || undefined,
-                referralCode: referralCode || undefined
+                region: region || undefined
             });
             
             // Login after successful registration
@@ -227,6 +343,7 @@ class AuthUI {
                     <span class="profile-avatar">${user.avatar_emoji || '🌱'}</span>
                     <h2>${user.display_name || user.username}</h2>
                     <span class="profile-level">Level ${user.level}</span>
+                    ${user.google_id ? '<span class="google-badge">🔗 Google</span>' : ''}
                 </div>
                 
                 <div class="profile-stats">
@@ -251,7 +368,7 @@ class AuthUI {
                 <div class="profile-details">
                     <p><strong>Streak:</strong> ${user.streak_days} Tage 🔥</p>
                     <p><strong>Region:</strong> ${user.region || 'Nicht angegeben'}</p>
-                    <p><strong>Referral-Code:</strong> <code>${user.referral_code}</code></p>
+                    <p><strong>Referral-Code:</strong> <code>${user.referral_code || 'N/A'}</code></p>
                 </div>
                 
                 <div class="profile-actions">
@@ -315,6 +432,11 @@ class AuthUI {
     }
     
     logout() {
+        // Also sign out from Google
+        if (window.google && this.googleInitialized) {
+            google.accounts.id.disableAutoSelect();
+        }
+        
         ProvolutionAPI.auth.logout();
         this.currentUser = null;
         this.render();

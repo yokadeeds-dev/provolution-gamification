@@ -29,6 +29,7 @@ from .routers import (
     rewards_router
 )
 from .routers.footprint import router as footprint_router
+from .routers.google_auth import router as google_auth_router
 
 
 # App metadata
@@ -153,6 +154,7 @@ app.include_router(leaderboards_router, prefix="/v1")
 app.include_router(badges_router, prefix="/v1")
 app.include_router(rewards_router, prefix="/v1")
 app.include_router(footprint_router, prefix="/v1")
+app.include_router(google_auth_router, prefix="/v1")
 
 
 # Root endpoint
