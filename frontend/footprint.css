@@ -1,0 +1,582 @@
+/* footprint.css - CO₂ Calculator Styles */
+
+/* ============================================
+   CALCULATOR CONTAINER
+   ============================================ */
+
+.footprint-calculator {
+    max-width: 700px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.calc-header {
+    background: linear-gradient(135deg, #2e7d32, #1b5e20);
+    color: white;
+    padding: 24px;
+    text-align: center;
+}
+
+.calc-header h2 {
+    margin: 0 0 8px;
+    font-size: 1.5rem;
+}
+
+.calc-header p {
+    margin: 0;
+    opacity: 0.9;
+}
+
+/* ============================================
+   PROGRESS BAR
+   ============================================ */
+
+.progress-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: #f5f5f5;
+    gap: 8px;
+}
+
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    opacity: 0.5;
+    transition: all 0.3s;
+}
+
+.progress-step.active,
+.progress-step.completed {
+    opacity: 1;
+}
+
+.step-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #e0e0e0;
+    color: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.progress-step.active .step-number {
+    background: #2e7d32;
+    color: white;
+}
+
+.progress-step.completed .step-number {
+    background: #4caf50;
+    color: white;
+}
+
+.progress-step.completed .step-number::after {
+    content: '✓';
+    position: absolute;
+}
+
+.step-label {
+    font-size: 0.7rem;
+    color: #666;
+    white-space: nowrap;
+}
+
+.progress-line {
+    width: 30px;
+    height: 2px;
+    background: #e0e0e0;
+}
+
+/* ============================================
+   STEP CONTENT
+   ============================================ */
+
+.calc-content {
+    padding: 24px;
+    min-height: 400px;
+}
+
+.step-content h3 {
+    margin: 0 0 24px;
+    color: #1b5e20;
+    font-size: 1.3rem;
+}
+
+/* ============================================
+   FORM ELEMENTS
+   ============================================ */
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+/* Radio & Checkbox Cards */
+.radio-group,
+.checkbox-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.radio-group.vertical {
+    flex-direction: column;
+}
+
+.radio-group.small .radio-card {
+    padding: 10px 16px;
+}
+
+.radio-card,
+.checkbox-card {
+    flex: 1;
+    min-width: 100px;
+    padding: 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+}
+
+.radio-card input,
+.checkbox-card input {
+    display: none;
+}
+
+.radio-card:hover,
+.checkbox-card:hover {
+    border-color: #4caf50;
+    background: #f9fbe7;
+}
+
+.radio-card.selected,
+.checkbox-card.selected {
+    border-color: #2e7d32;
+    background: #e8f5e9;
+}
+
+.radio-card .icon,
+.checkbox-card .icon {
+    font-size: 1.5rem;
+}
+
+.radio-card .text,
+.checkbox-card .text {
+    font-weight: 500;
+}
+
+.radio-card .hint {
+    font-size: 0.75rem;
+    color: #666;
+}
+
+/* Sliders */
+.slider {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: #e0e0e0;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #2e7d32;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.slider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #2e7d32;
+    cursor: pointer;
+    border: none;
+}
+
+.slider-value {
+    display: block;
+    text-align: center;
+    margin-top: 8px;
+    font-weight: 600;
+    color: #2e7d32;
+}
+
+/* Select */
+.select-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: white;
+    cursor: pointer;
+}
+
+.select-input:focus {
+    outline: none;
+    border-color: #2e7d32;
+}
+
+/* Hidden */
+.hidden {
+    display: none !important;
+}
+
+/* ============================================
+   NAVIGATION
+   ============================================ */
+
+.calc-navigation {
+    display: flex;
+    justify-content: space-between;
+    padding: 16px 24px;
+    background: #f5f5f5;
+    border-top: 1px solid #e0e0e0;
+}
+
+.btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.btn-primary {
+    background: #2e7d32;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #1b5e20;
+}
+
+.btn-secondary {
+    background: white;
+    color: #666;
+    border: 1px solid #ddd;
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: #f5f5f5;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ============================================
+   RESULT PAGE
+   ============================================ */
+
+.result-content {
+    padding: 0 !important;
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-around;
+    padding: 32px;
+    background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+}
+
+.total-footprint,
+.sec-score {
+    text-align: center;
+}
+
+.total-footprint .label,
+.sec-score .label {
+    display: block;
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.total-footprint .value {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #1b5e20;
+}
+
+.total-footprint .unit {
+    display: block;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.sec-score .value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--score-color, #ff9800);
+}
+
+.sec-score .max {
+    font-size: 1rem;
+    color: #999;
+}
+
+/* Comparison Bars */
+.comparison-bars {
+    padding: 24px;
+}
+
+.bar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.bar-label {
+    width: 120px;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.bar-track {
+    flex: 1;
+    height: 24px;
+    background: #f0f0f0;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    border-radius: 12px;
+    transition: width 0.5s ease;
+}
+
+.bar-fill.you { background: linear-gradient(90deg, #2e7d32, #4caf50); }
+.bar-fill.germany { background: #ff9800; }
+.bar-fill.world { background: #2196f3; }
+.bar-fill.target { background: #9c27b0; }
+
+.bar-value {
+    width: 50px;
+    text-align: right;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+/* Breakdown Chart */
+.breakdown-chart {
+    padding: 24px;
+    background: #fafafa;
+}
+
+.breakdown-chart h4 {
+    margin: 0 0 16px;
+    color: #333;
+}
+
+.pie-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.dot.housing { background: #2196f3; }
+.dot.mobility { background: #f44336; }
+.dot.nutrition { background: #4caf50; }
+.dot.consumption { background: #ff9800; }
+
+/* Recommendations */
+.recommendations {
+    padding: 24px;
+}
+
+.recommendations h4 {
+    margin: 0 0 16px;
+    color: #333;
+}
+
+.rec-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+
+.rec-icon {
+    font-size: 1.5rem;
+}
+
+.rec-content {
+    flex: 1;
+}
+
+.rec-action {
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.rec-savings {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.savings-value {
+    color: #2e7d32;
+    font-weight: 600;
+}
+
+.difficulty {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: #f5f5f5;
+}
+
+.difficulty.easy { background: #e8f5e9; color: #2e7d32; }
+.difficulty.medium { background: #fff3e0; color: #e65100; }
+.difficulty.hard { background: #ffebee; color: #c62828; }
+
+.btn-join-challenge {
+    padding: 8px 16px;
+    background: #2e7d32;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.btn-join-challenge:hover {
+    background: #1b5e20;
+}
+
+/* CTA Boxes */
+.cta-register,
+.cta-saved {
+    padding: 24px;
+    margin: 24px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.cta-register {
+    background: #fff3e0;
+    border: 2px dashed #ff9800;
+}
+
+.cta-saved {
+    background: #e8f5e9;
+    border: 2px solid #4caf50;
+}
+
+.cta-register p,
+.cta-saved p {
+    margin: 0 0 16px;
+}
+
+/* Loading */
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    font-size: 1.2rem;
+    color: #666;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 600px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .radio-group:not(.vertical) {
+        flex-direction: column;
+    }
+    
+    .result-header {
+        flex-direction: column;
+        gap: 24px;
+    }
+    
+    .bar-label {
+        width: 80px;
+        font-size: 0.75rem;
+    }
+    
+    .progress-bar {
+        overflow-x: auto;
+        justify-content: flex-start;
+        padding: 16px;
+    }
+    
+    .step-label {
+        display: none;
+    }
+    
+    .rec-card {
+        flex-wrap: wrap;
+    }
+    
+    .btn-join-challenge {
+        width: 100%;
+        margin-top: 8px;
+    }
+}
