@@ -1,7 +1,5 @@
 // Configuration for Provolution Gamification Frontend
-// This file is loaded before api-client.js
-
-// API URL - will be set during deployment or use default
+// API URL - Render.com Production
 window.PROVOLUTION_API_URL = 'https://provolution-api.onrender.com/v1';
 
 // App configuration
