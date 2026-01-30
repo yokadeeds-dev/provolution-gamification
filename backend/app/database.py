@@ -379,22 +379,58 @@ def initialize_database():
         ''', badges)
         print(f"[DB] Inserted {len(badges)} badges")
     
-    # Insert sample challenges
-    challenges = [
-        ('EN-1', 'energy', 'Standby-Killer', '⚡ Standby-Killer', 'Schalte alle Standby-Geräte konsequent aus', 'Identifiziere und eliminiere alle Standby-Verbraucher in deinem Haushalt für 7 Tage.', 7, 150, 'easy', '["7 Tage ohne Standby", "Mind. 5 Geräte identifiziert"]', 'self_report', 'checklist', 1, 0.1, 'Strom-Ninja', '⚡', 'silver', 50.0, 30.0, 'energy', 1, 1),
-        ('EN-2', 'energy', 'LED-Umrüster', '💡 LED-Umrüster', 'Ersetze 5 alte Glühbirnen durch LEDs', 'Tausche mindestens 5 herkömmliche Glühbirnen oder Halogenlampen gegen LED-Lampen aus.', 14, 200, 'easy', '["5+ Lampen getauscht", "Foto-Dokumentation"]', 'photo_proof', 'photo', 0, 0.2, 'Licht-Champion', '💡', 'bronze', 80.0, 40.0, 'energy', 1, 0),
-        ('MO-1', 'mobility', 'Fahrrad-Pendler', '🚲 Fahrrad-Pendler', 'Fahre 5 Tage mit dem Rad zur Arbeit', 'Ersetze deine Auto-Pendelstrecke für 5 Arbeitstage durch das Fahrrad.', 7, 250, 'medium', '["5 Tage Rad-Pendeln", "Mind. 5km pro Tag"]', 'gps_track', 'automatic', 1, 0.05, 'Pedalritter', '🚲', 'gold', 200.0, 100.0, 'mobility', 1, 1),
-        ('NU-1', 'nutrition', 'Veggie-Woche', '🥗 Veggie-Woche', 'Eine Woche vegetarisch essen', 'Ernähre dich 7 Tage lang komplett vegetarisch.', 7, 200, 'medium', '["7 Tage vegetarisch", "Keine Fleischprodukte"]', 'self_report', 'checklist', 1, 0.1, 'Gemüse-Held', '🥗', 'silver', 150.0, 50.0, 'nutrition', 1, 1),
-        ('ON-1', 'onboarding', 'CO₂-Footprint Tracker', '📊 CO₂-Footprint', 'Berechne deinen persönlichen CO₂-Fußabdruck', 'Nutze unseren Rechner um deinen Baseline-Fußabdruck zu ermitteln.', 1, 100, 'easy', '["Footprint berechnet", "Alle Kategorien ausgefüllt"]', 'automatic', 'system', 1, 0.0, 'CO₂-Tracker', '📊', 'bronze', 0.0, 0.0, 'onboarding', 1, 1),
-    ]
-    
+    # Load and insert ALL challenges from challenges.json
     cursor.execute("SELECT COUNT(*) FROM challenges")
     if cursor.fetchone()[0] == 0:
-        cursor.executemany('''
-            INSERT INTO challenges (id, category, name, name_emoji, description, description_long, duration_days, xp_reward, difficulty, success_criteria, verification_method, verification_type, auto_verify, spot_check_rate, badge_name, badge_icon, badge_tier, co2_impact_kg_year, savings_euro_year, impact_type, is_active, is_featured)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', challenges)
-        print(f"[DB] Inserted {len(challenges)} challenges")
+        challenges_json_path = Path(__file__).parent.parent.parent / "challenges.json"
+        
+        if challenges_json_path.exists():
+            import json
+            with open(challenges_json_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            challenges_data = data.get('challenges', [])
+            challenges_to_insert = []
+            
+            for challenge in challenges_data:
+                challenges_to_insert.append((
+                    challenge['id'],
+                    challenge['category'],
+                    challenge['name'],
+                    challenge.get('name_emoji'),
+                    challenge['description'],
+                    challenge.get('description_long'),
+                    challenge['duration_days'],
+                    challenge['xp_reward'],
+                    challenge.get('difficulty'),
+                    json.dumps(challenge.get('success_criteria', [])),
+                    challenge.get('verification', {}).get('method'),
+                    challenge.get('verification', {}).get('type'),
+                    1 if challenge.get('verification', {}).get('auto_verify', False) else 0,
+                    challenge.get('verification', {}).get('spot_check_rate', 0.1),
+                    challenge.get('badge', {}).get('name'),
+                    challenge.get('badge', {}).get('icon'),
+                    challenge.get('badge', {}).get('tier'),
+                    challenge.get('impact', {}).get('co2_kg_year'),
+                    challenge.get('impact', {}).get('savings_euro_year'),
+                    challenge.get('impact', {}).get('type'),
+                    1,  # is_active
+                    1 if challenge.get('category') == 'onboarding' else 0  # is_featured
+                ))
+            
+            cursor.executemany('''
+                INSERT INTO challenges (id, category, name, name_emoji, description, description_long, duration_days, xp_reward, difficulty, success_criteria, verification_method, verification_type, auto_verify, spot_check_rate, badge_name, badge_icon, badge_tier, co2_impact_kg_year, savings_euro_year, impact_type, is_active, is_featured)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', challenges_to_insert)
+            print(f"[DB] Inserted {len(challenges_to_insert)} challenges from challenges.json")
+        else:
+            print(f"[DB] WARNING: challenges.json not found at {challenges_json_path}, using minimal fallback")
+            # Fallback: Insert only ON-1 challenge (required for footprint completion)
+            cursor.execute('''
+                INSERT INTO challenges (id, category, name, name_emoji, description, description_long, duration_days, xp_reward, difficulty, success_criteria, verification_method, verification_type, auto_verify, spot_check_rate, badge_name, badge_icon, badge_tier, co2_impact_kg_year, savings_euro_year, impact_type, is_active, is_featured)
+                VALUES ('ON-1', 'onboarding', 'CO₂-Footprint Tracker', '📊 CO₂-Footprint', 'Berechne deinen persönlichen CO₂-Fußabdruck', 'Nutze unseren Rechner um deinen Baseline-Fußabdruck zu ermitteln.', 1, 100, 'easy', '["Footprint berechnet"]', 'automatic', 'system', 1, 0.0, 'CO₂-Tracker', '📊', 'bronze', 0.0, 0.0, 'onboarding', 1, 1)
+            ''')
+            print("[DB] Inserted 1 fallback challenge (ON-1)")
     
     conn.commit()
     conn.close()
