@@ -51,7 +51,29 @@ class FootprintCalculator {
 
     init(isAuthenticated = false) {
         this.isAuthenticated = isAuthenticated;
+
+        // Listen for auth events
+        window.addEventListener('auth:login', (e) => this.handleAuthChange(true, e.detail));
+        window.addEventListener('auth:logout', () => this.handleAuthChange(false));
+
         this.render();
+    }
+
+    handleAuthChange(isAuthenticated, user = null) {
+        console.log(`🔄 FootprintCalculator: Auth changed -> ${isAuthenticated ? 'Logged In' : 'Logged Out'}`);
+        this.isAuthenticated = isAuthenticated;
+
+        if (user && user.token) {
+            // Update API client token if needed (though typically handled by ProvolutionAPI)
+            if (this.api && !this.api.getToken()) {
+                this.api.setToken(user.token);
+            }
+        }
+
+        // If we're on the result step, we need to recalculate (to save data) and re-render
+        if (this.steps[this.currentStep] === 'result') {
+            this.calculate().then(() => this.render());
+        }
     }
 
     render() {
@@ -75,7 +97,7 @@ class FootprintCalculator {
                 </div>
             </div>
         `;
-        
+
         this.attachEventListeners();
     }
 
@@ -90,7 +112,7 @@ class FootprintCalculator {
     }
 
     renderCurrentStep() {
-        switch(this.steps[this.currentStep]) {
+        switch (this.steps[this.currentStep]) {
             case 'housing': return this.renderHousingStep();
             case 'mobility': return this.renderMobilityStep();
             case 'nutrition': return this.renderNutritionStep();
@@ -373,10 +395,10 @@ class FootprintCalculator {
         const r = this.result;
         const b = r.breakdown;
         const c = r.comparison;
-        
+
         // Farbe basierend auf SEC-Score
         const scoreColor = r.sec_score >= 7 ? '#4caf50' : r.sec_score >= 4 ? '#ff9800' : '#f44336';
-        
+
         return `
             <div class="step-content result-content">
                 <div class="result-header">
@@ -484,7 +506,7 @@ class FootprintCalculator {
         const isFirst = this.currentStep === 0;
         const isLast = this.currentStep === this.steps.length - 1;
         const isBeforeResult = this.currentStep === this.steps.length - 2;
-        
+
         return `
             <button class="btn btn-secondary" ${isFirst ? 'disabled' : ''} onclick="footprintCalc.prevStep()">
                 ← Zurück
@@ -506,12 +528,12 @@ class FootprintCalculator {
         this.container.querySelectorAll('input[type="radio"]').forEach(input => {
             input.addEventListener('change', (e) => this.updateValue(e.target.name, e.target.value));
         });
-        
+
         // Checkboxes
         this.container.querySelectorAll('input[type="checkbox"]').forEach(input => {
             input.addEventListener('change', (e) => this.updateValue(e.target.name, e.target.checked));
         });
-        
+
         // Sliders
         this.container.querySelectorAll('input[type="range"]').forEach(input => {
             input.addEventListener('input', (e) => {
@@ -531,12 +553,12 @@ class FootprintCalculator {
                 }
             });
         });
-        
+
         // Selects
         this.container.querySelectorAll('select').forEach(select => {
             select.addEventListener('change', (e) => this.updateValue(e.target.name, e.target.value));
         });
-        
+
         // Car toggle
         const hasCarCheckbox = this.container.querySelector('input[name="has_car"]');
         if (hasCarCheckbox) {
@@ -547,7 +569,7 @@ class FootprintCalculator {
                 }
             });
         }
-        
+
         // Challenge join buttons
         this.container.querySelectorAll('.btn-join-challenge').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -569,7 +591,7 @@ class FootprintCalculator {
                 break;
             }
         }
-        
+
         // Update UI for radio/checkbox cards
         const cards = this.container.querySelectorAll(`input[name="${name}"]`);
         cards.forEach(input => {
@@ -583,12 +605,12 @@ class FootprintCalculator {
     async nextStep() {
         if (this.currentStep < this.steps.length - 1) {
             this.currentStep++;
-            
+
             // If moving to result step, calculate
             if (this.steps[this.currentStep] === 'result') {
                 await this.calculate();
             }
-            
+
             this.render();
         }
     }
@@ -604,33 +626,139 @@ class FootprintCalculator {
         try {
             // Use authenticated endpoint if logged in
             const endpoint = this.isAuthenticated ? '/footprint/me' : '/footprint/calculate';
-            
-            // Use API client if available, otherwise direct fetch
-            if (this.api && typeof this.api.post === 'function') {
-                this.result = await this.api.post(endpoint, this.data);
+
+            // Debug logging
+            const token = this.api?.getToken?.() || null;
+            console.log('[Footprint] Calculating...', {
+                isAuthenticated: this.isAuthenticated,
+                hasApiClient: !!this.api,
+                hasToken: !!token,
+                endpoint
+            });
+
+            // Use API client's footprint methods if available
+            if (this.api && this.isAuthenticated && typeof this.api.footprint?.save === 'function') {
+                console.log('[Footprint] Using api.footprint.save()');
+                this.result = await this.api.footprint.save(this.data);
+            } else if (this.api && typeof this.api.footprint?.calculate === 'function') {
+                console.log('[Footprint] Using api.footprint.calculate()');
+                this.result = await this.api.footprint.calculate(this.data);
             } else {
                 // Fallback: Use global API_BASE_URL from config.js
+                console.log('[Footprint] Using fallback fetch');
                 const baseUrl = window.API_BASE_URL || 'https://provolution-api.onrender.com/v1';
                 const response = await fetch(`${baseUrl}${endpoint}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        ...(this.isAuthenticated && this.api?.token ? { 'Authorization': `Bearer ${this.api.token}` } : {})
+                        ...(this.isAuthenticated && token ? { 'Authorization': `Bearer ${token}` } : {})
                     },
                     body: JSON.stringify(this.data)
                 });
-                
+
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({}));
                     throw new Error(errorData.detail || 'Calculation failed');
                 }
-                
+
                 this.result = await response.json();
+            }
+
+            console.log('[Footprint] Calculation result:', this.result);
+
+            // Auto-complete ON-1 challenge for authenticated users
+            if (this.isAuthenticated) {
+                await this.autoCompleteOnboardingChallenge();
             }
         } catch (error) {
             console.error('Footprint calculation error:', error);
             alert('Fehler bei der Berechnung: ' + error.message);
         }
+    }
+
+    /**
+     * Auto-complete the ON-1 "Klimaheld-Profil" challenge after first footprint calculation
+     */
+    async autoCompleteOnboardingChallenge() {
+        const ON1_CHALLENGE_ID = 'ON-1';
+
+        try {
+            // Check if challengesUI is available
+            if (!window.challengesUI) {
+                console.log('[Footprint] ChallengesUI not available, skipping ON-1 auto-complete');
+                return;
+            }
+
+            // Find ON-1 challenge
+            const on1Challenge = window.challengesUI.challenges.find(c =>
+                c.id === ON1_CHALLENGE_ID || c.id?.toLowerCase() === 'on-1'
+            );
+
+            if (!on1Challenge) {
+                console.log('[Footprint] ON-1 challenge not found');
+                return;
+            }
+
+            // Check if already completed
+            if (on1Challenge.user_status === 'completed') {
+                console.log('[Footprint] ON-1 already completed');
+                return;
+            }
+
+            // If not joined, join first
+            if (on1Challenge.user_status !== 'active') {
+                console.log('[Footprint] Joining ON-1 challenge first...');
+                try {
+                    await ProvolutionAPI.challenges.join(ON1_CHALLENGE_ID);
+                } catch (err) {
+                    // Might already be joined, continue
+                    console.log('[Footprint] Join attempt:', err.message);
+                }
+            }
+
+            // Complete the challenge
+            console.log('[Footprint] Auto-completing ON-1 challenge...');
+            const result = await ProvolutionAPI.challenges.complete(ON1_CHALLENGE_ID);
+
+            // Update local state
+            on1Challenge.user_status = 'completed';
+
+            // Show celebration via challengesUI
+            if (window.challengesUI?.showCompletionCelebration) {
+                window.challengesUI.showCompletionCelebration(on1Challenge, result);
+            } else {
+                // Fallback notification
+                this.showOnboardingCompleteNotification(result?.xp_earned || 50);
+            }
+
+            // Reload challenges UI if available
+            if (window.challengesUI?.loadActiveChallenges) {
+                await window.challengesUI.loadActiveChallenges();
+                await window.challengesUI.loadChallenges();
+            }
+
+            // Emit XP event
+            window.dispatchEvent(new CustomEvent('xp:earned', {
+                detail: { xp: result?.xp_earned || 50, challengeId: ON1_CHALLENGE_ID, challengeName: on1Challenge.name }
+            }));
+
+            console.log('[Footprint] ON-1 challenge completed successfully!');
+        } catch (error) {
+            console.error('[Footprint] ON-1 auto-complete error:', error);
+            // Don't show error to user, this is a bonus feature
+        }
+    }
+
+    showOnboardingCompleteNotification(xpEarned) {
+        const notification = document.createElement('div');
+        notification.className = 'notification notification-success';
+        notification.innerHTML = `🎉 Challenge ON-1 abgeschlossen! +${xpEarned} XP`;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.classList.add('fade-out');
+            setTimeout(() => notification.remove(), 300);
+        }, 4000);
     }
 
     restart() {

@@ -56,22 +56,22 @@ function getToken() {
  */
 async function apiRequest(endpoint, options = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
-    
+
     const headers = {
         'Content-Type': 'application/json',
         ...options.headers
     };
-    
+
     if (authToken) {
         headers['Authorization'] = `Bearer ${authToken}`;
     }
-    
+
     try {
         const response = await fetch(url, {
             ...options,
             headers
         });
-        
+
         // Handle non-JSON responses
         const contentType = response.headers.get('content-type');
         if (!contentType || !contentType.includes('application/json')) {
@@ -84,16 +84,16 @@ async function apiRequest(endpoint, options = {}) {
             }
             return { success: true };
         }
-        
+
         const data = await response.json();
-        
+
         if (!response.ok) {
             throw {
                 status: response.status,
                 ...(data.error || { code: 'UNKNOWN_ERROR', message: 'Unknown error' })
             };
         }
-        
+
         return data;
     } catch (error) {
         // Handle network errors
@@ -104,7 +104,7 @@ async function apiRequest(endpoint, options = {}) {
                 message: 'Could not connect to server. Please check your internet connection.'
             };
         }
-        
+
         if (error.code === 'UNAUTHORIZED') {
             clearToken();
             window.dispatchEvent(new CustomEvent('auth:logout'));
@@ -146,14 +146,14 @@ const AuthAPI = {
                 referral_code: options.referralCode
             })
         });
-        
+
         if (data.token) {
             setToken(data.token);
         }
-        
+
         return data;
     },
-    
+
     /**
      * Login user
      */
@@ -162,14 +162,14 @@ const AuthAPI = {
             method: 'POST',
             body: JSON.stringify({ email, password })
         });
-        
+
         if (data.token) {
             setToken(data.token);
         }
-        
+
         return data;
     },
-    
+
     /**
      * Logout user
      */
@@ -190,7 +190,7 @@ const UserAPI = {
     async getProfile() {
         return apiRequest('/users/me');
     },
-    
+
     /**
      * Update user profile
      */
@@ -200,7 +200,7 @@ const UserAPI = {
             body: JSON.stringify(updates)
         });
     },
-    
+
     /**
      * Get user stats
      */
@@ -224,18 +224,18 @@ const ChallengesAPI = {
         if (filters.status) params.append('status', filters.status);
         if (filters.limit) params.append('limit', filters.limit);
         if (filters.offset) params.append('offset', filters.offset);
-        
+
         const query = params.toString();
         return apiRequest(`/challenges${query ? '?' + query : ''}`);
     },
-    
+
     /**
      * Get challenge details
      */
     async get(challengeId) {
         return apiRequest(`/challenges/${challengeId}`);
     },
-    
+
     /**
      * Join a challenge
      */
@@ -244,7 +244,7 @@ const ChallengesAPI = {
             method: 'POST'
         });
     },
-    
+
     /**
      * Log daily progress
      */
@@ -254,12 +254,38 @@ const ChallengesAPI = {
             body: JSON.stringify(data)
         });
     },
-    
+
     /**
      * Get user's progress on a challenge
      */
     async getProgress(challengeId) {
         return apiRequest(`/challenges/${challengeId}/progress`);
+    },
+
+    /**
+     * Get user's active challenges
+     */
+    async getActiveChallenges() {
+        return apiRequest('/user/challenges/active');
+    },
+
+    /**
+     * Track progress on a challenge
+     */
+    async trackProgress(challengeId, progressData) {
+        return apiRequest(`/challenges/${challengeId}/progress`, {
+            method: 'POST',
+            body: JSON.stringify(progressData)
+        });
+    },
+
+    /**
+     * Mark a challenge as complete
+     */
+    async complete(challengeId) {
+        return apiRequest(`/challenges/${challengeId}/complete`, {
+            method: 'POST'
+        });
     }
 };
 
@@ -274,14 +300,14 @@ const LeaderboardsAPI = {
     async weekly(limit = 10) {
         return apiRequest(`/leaderboards/weekly?limit=${limit}`);
     },
-    
+
     /**
      * Get monthly leaderboard
      */
     async monthly(limit = 10) {
         return apiRequest(`/leaderboards/monthly?limit=${limit}`);
     },
-    
+
     /**
      * Get regional leaderboard
      */
@@ -301,7 +327,7 @@ const BadgesAPI = {
     async list() {
         return apiRequest('/badges');
     },
-    
+
     /**
      * Get user's badges
      */
@@ -321,7 +347,7 @@ const RewardsAPI = {
     async listPackages() {
         return apiRequest('/rewards/packages');
     },
-    
+
     /**
      * Redeem a package
      */
@@ -347,14 +373,14 @@ const FootprintAPI = {
             body: JSON.stringify(inputs)
         });
     },
-    
+
     /**
      * Get emission factors
      */
     async getFactors() {
         return apiRequest('/footprint/factors');
     },
-    
+
     /**
      * Save footprint to user profile (requires auth)
      */
@@ -364,7 +390,7 @@ const FootprintAPI = {
             body: JSON.stringify(inputs)
         });
     },
-    
+
     /**
      * Get user's footprint history
      */
